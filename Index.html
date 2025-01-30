@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarization</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Text Summarization</h1>
+        <textarea id="inputText" rows="10" placeholder="Enter text here..."></textarea>
+        <button onclick="summarizeText()">Summarize</button>
+        <div id="outputText"></div>
+        <button onclick="textToSpeech()">Convert to Speech</button>
+        <button onclick="textToImage()">Convert to Image</button>
+        <div id="outputImage"></div>
+    </div>
+
+    <script>
+        function summarizeText() {
+            const inputText = document.getElementById('inputText').value;
+            fetch('/summarize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: inputText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('outputText').innerText = data.summary;
+            });
+        }
+
+        function textToSpeech() {
+            const text = document.getElementById('outputText').innerText;
+            fetch('/text-to-speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                audio.play();
+            });
+        }
+
+        function textToImage() {
+            const text = document.getElementById('outputText').innerText;
+            fetch('/text-to-image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                document.getElementById('outputImage').innerHTML = `<img src="${url}" alt="Text Image"/>`;
+            });
+        }
+    </script>
+</body>
+</html>
